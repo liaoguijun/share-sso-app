@@ -11,18 +11,17 @@ import styles from "../styles/Home.module.css";
   // 未登录：登录后返回ticket, serviceURL携带ticket返回
   // 已登录：根据serviceURL返回ticket, serviceURL携带ticket返回
 
-function getUrlParam(name) {
-  var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
-  var r = window.location.search.substr(1).match(reg); //匹配目标参数
-  if (r !== null) return unescape(r[2]);
-  return null; //返回参数值
+// 替换url指定参数 如a=100替换为a=dsfsd
+function replaceQueryString(url, name, value) {
+  const reg = new RegExp(name + '=[^&]*', 'gi')
+  return url.replace(reg, name + '=' + value)
 }
 
 export default function Login() {
   const [form] = Form.useForm();
   const { query, isReady } = useRouter();
   let { serviceURL } = query;
-  const [init, setInit] = useState(false);
+  const [init, setInit] = useState(false); 
 
   useEffect(() => {
     if (isReady) {
@@ -78,8 +77,12 @@ export default function Login() {
   };
 
   const backUrl = (serviceURL, ticket) => {
-
-    window.location.replace(`${serviceURL}?ticket=${ticket}`);
+    if(serviceURL.includes('ticket')) {
+      const _serviceURL = replaceQueryString(serviceURL, 'ticket', ticket)
+      window.location.replace(_serviceURL);
+    }else {
+      window.location.replace(`${serviceURL}?ticket=${ticket}`);
+    }
   }
 
   return init ? (

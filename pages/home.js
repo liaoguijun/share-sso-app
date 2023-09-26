@@ -31,7 +31,8 @@ export default function Home() {
   const redirectUrl = () => {
     const serviceURL = window.location.href;
     window.location.replace(
-      `http://a.com:10000/login?serviceURL=${serviceURL}`
+      // `http://a.com:10000/login?serviceURL=${serviceURL}`
+      `http://localhost:3000/login?serviceURL=${encodeURIComponent(serviceURL)}`
     );
   };
 
