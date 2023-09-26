@@ -6,21 +6,18 @@ import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 
 import styles from "../styles/Home.module.css";
+import { replaceQueryString, removeParam, addParam } from '../utils'
 
 // case1：跳转到登录页面（serviceURL如果未携带会默认一个URL）
   // 未登录：登录后返回ticket, serviceURL携带ticket返回
   // 已登录：根据serviceURL返回ticket, serviceURL携带ticket返回
 
-// 替换url指定参数 如a=100替换为a=dsfsd
-function replaceQueryString(url, name, value) {
-  const reg = new RegExp(name + '=[^&]*', 'gi')
-  return url.replace(reg, name + '=' + value)
-}
+
 
 export default function Login() {
   const [form] = Form.useForm();
   const { query, isReady } = useRouter();
-  let { serviceURL } = query;
+  let { serviceURL, needLogin } = query; // serviceURL needLogin: 1: serviceUrl必须登录才能访问 2: serviceUrl不用登录也可以访问
   const [init, setInit] = useState(false); 
 
   useEffect(() => {
@@ -29,8 +26,13 @@ export default function Login() {
         setInit(false); // 不显示登录表单
         getServiceTicket(); // 获取ticket
         return;
+      }else if(needLogin === '1') { // serviceUrl一定要登录才能访问
+        setInit(true)
+      }else {
+        let _serviceURL = removeParam( 'ticket', serviceURL)
+        _serviceURL = addParam('isLogin', '2', _serviceURL)
+        window.location.replace(_serviceURL);
       }
-      setInit(true)
     }
   }, [isReady]);
 

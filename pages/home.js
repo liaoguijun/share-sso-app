@@ -23,7 +23,9 @@ export default function Home() {
       getUserInfo();
     } else if (query.ticket) {
       verifyTicket({ ticket: query.ticket });
-    } else {
+    } else if(query.isLogin === '2' || Cookies.get('isLogin' === '2')) { // 登录页面的域名也未登录
+      Cookies.set('isLogin', '2') 
+    }else {
       redirectUrl();
     }
   };
