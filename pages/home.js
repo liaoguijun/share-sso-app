@@ -2,40 +2,29 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import { Button } from "antd";
 import axios from "../axios";
-import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
-  const router = useRouter();
-  const { query, isReady } = router;
   const [userInfo, setUserInfo] = useState({});
 
   useEffect(() => {
-    if (isReady) {
-      init();
-    }
-  }, [isReady]);
-
-  const init = () => {
     if (Cookies.get("token")) {
       getUserInfo();
-    } else if (query.ticket) {
-      verifyTicket({ ticket: query.ticket });
-    } else if(query.isLogin === '2' || Cookies.get('isLogin' === '2')) { // 登录页面的域名也未登录
-      Cookies.set('isLogin', '2') 
-    }else {
-      redirectUrl();
+    } else {
+      window.addEventListener("message", function (event) {
+        // 判断消息是否来自可信任的源
+        // if (event.origin === '') {
+          console.log(event)
+        // console.log("message: " + JSON.parse(event.data));
+        // }
+      });
     }
-  };
+  }, []);
 
-  const redirectUrl = () => {
-    const serviceURL = window.location.href;
-    window.location.replace(
-      // `http://a.com:10000/login?serviceURL=${serviceURL}`
-      `http://localhost:3000/login?serviceURL=${encodeURIComponent(serviceURL)}`
-    );
+  const redirectUrl = () => { // 跳转登录页面
+    // window.location.replace(`http://localhost:3000/login`);
   };
 
   // 获取用户信息
@@ -52,23 +41,6 @@ export default function Home() {
     }
   };
 
-  // 验证sso ticket
-  const verifyTicket = async () => {
-    try {
-      const { status, data } = await axios.post("/api/verifyTicket", {
-        ticket: query.ticket,
-      });
-      if (status === 200) {
-        Cookies.set("token", data.data.token);
-        getUserInfo();
-      } else {
-        redirectUrl();
-      }
-    } catch (err) {
-      redirectUrl();
-    }
-  };
-
   return (
     <>
       <Head>
@@ -76,7 +48,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={styles.container}>
-        {userInfo.email && (
+        {userInfo.email ? (
           <>
             <div>
               当前登录账号:
@@ -84,6 +56,10 @@ export default function Home() {
             </div>
             <Button>退出登录</Button>
           </>
+        ) : (
+          <div style={{ width: 200, height: 100 }}>
+            <iframe src="http://a.com:10000/login" />
+          </div>
         )}
       </div>
     </>
